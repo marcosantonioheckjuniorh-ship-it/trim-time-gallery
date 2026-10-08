@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Store newly added gallery media in Lovable Assets and import its generated JSON pointers; this keeps uploaded binaries out of the repository.

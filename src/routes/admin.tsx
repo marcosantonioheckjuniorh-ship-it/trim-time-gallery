@@ -13,6 +13,8 @@ export const Route = createFileRoute("/admin")({
       { name: "description", content: "Painel administrativo da Barbearia Staudt." },
       { property: "og:title", content: "Painel do Dono — Barbearia Staudt" },
       { property: "og:description", content: "Gerencie agendamentos, serviços e barbeiros." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
   }),
