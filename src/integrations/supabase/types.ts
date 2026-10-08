@@ -14,16 +14,142 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      appointments: {
+        Row: {
+          appt_date: string
+          appt_time: string
+          barber_id: string
+          client_name: string
+          client_phone: string
+          created_at: string
+          id: string
+          service_id: string | null
+          status: string
+        }
+        Insert: {
+          appt_date: string
+          appt_time: string
+          barber_id: string
+          client_name: string
+          client_phone: string
+          created_at?: string
+          id?: string
+          service_id?: string | null
+          status?: string
+        }
+        Update: {
+          appt_date?: string
+          appt_time?: string
+          barber_id?: string
+          client_name?: string
+          client_phone?: string
+          created_at?: string
+          id?: string
+          service_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      barbers: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          active: boolean
+          duration_min: number
+          id: string
+          name: string
+          price: number
+          sort: number
+        }
+        Insert: {
+          active?: boolean
+          duration_min?: number
+          id?: string
+          name: string
+          price?: number
+          sort?: number
+        }
+        Update: {
+          active?: boolean
+          duration_min?: number
+          id?: string
+          name?: string
+          price?: number
+          sort?: number
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_booked_slots: {
+        Args: { _barber: string; _date: string }
+        Returns: string[]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +276,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin"],
+    },
   },
 } as const
