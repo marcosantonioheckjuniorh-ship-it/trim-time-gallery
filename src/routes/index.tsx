@@ -12,6 +12,7 @@ import g6 from "@/assets/real7.jpg";
 import g7 from "@/assets/real1.jpg";
 import g8 from "@/assets/real4.jpg";
 import logo from "@/assets/logo.png";
+import { useSitePhotos } from "@/lib/photos";
 import { Booking } from "@/components/Booking";
 import { AgendaPublic } from "@/components/AgendaPublic";
 import { ADDRESS, HOURS_LABEL, WHATSAPP } from "@/lib/schedule";
@@ -37,7 +38,7 @@ const services = [
   { t: "Pigmentação", d: "Preenchimento de falhas em barba e cabelo.", img: g7 },
 ];
 
-const gallery = [g1, g2, g3, g4, g5, g6, g7, g8, hero];
+const baseGallery = [g1, g2, g3, g4, g5, g6, g7, g8, hero];
 
 type PriceRow = { id: string; name: string; price: number };
 
@@ -64,13 +65,14 @@ function Index() {
             <a href="#galeria" className="hover:text-primary">Galeria</a>
             <a href="#agenda" className="hover:text-primary">Agenda</a>
             <a href="#contato" className="hover:text-primary">Contato</a>
+            <a href={INSTAGRAM} target="_blank" rel="noreferrer" aria-label="Instagram" className="hover:text-primary"><Instagram className="h-5 w-5" /></a>
           </nav>
           <a href="#agendar" className="btn-gold !px-4 !py-2 text-xs">Agendar</a>
         </div>
       </header>
 
       <section className="relative flex min-h-[100svh] items-end">
-        <img src={hero} alt="Barbeiro cortando cabelo na Barbearia Staudt" width={1600} height={1008} className="absolute inset-0 h-full w-full object-cover" />
+        <img src={heroImg} alt="Barbeiro cortando cabelo na Barbearia Staudt" width={1600} height={1008} className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-fade" />
         <div className="relative mx-auto w-full max-w-6xl px-5 pb-16 pt-32">
           <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-background/50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-primary">
@@ -86,6 +88,9 @@ function Index() {
             <a href="#agendar" className="btn-gold">Agendar horário</a>
             <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noreferrer" className="btn-outline">
               <MessageCircle className="h-4 w-4" /> WhatsApp
+            </a>
+            <a href={INSTAGRAM} target="_blank" rel="noreferrer" className="btn-outline">
+              <Instagram className="h-4 w-4" /> Instagram
             </a>
           </div>
         </div>
@@ -148,7 +153,7 @@ function Index() {
               </div>
             ))}
           </div>
-          <a href="https://www.instagram.com/barbearia.staudt" target="_blank" rel="noreferrer" className="btn-outline mt-10">
+          <a href={INSTAGRAM} target="_blank" rel="noreferrer" className="btn-outline mt-10">
             <Instagram className="h-4 w-4" /> @barbearia.staudt
           </a>
         </div>
@@ -171,11 +176,12 @@ function Index() {
 
       <section id="contato" className="relative">
         <img src={g6} alt="Interior da Barbearia Staudt" loading="lazy" width={1024} height={1024} className="absolute inset-0 h-full w-full object-cover opacity-30" />
-        <div className="relative mx-auto grid max-w-6xl gap-6 px-5 py-24 md:grid-cols-3">
+        <div className="relative mx-auto grid max-w-6xl gap-6 px-5 py-24 md:grid-cols-2 lg:grid-cols-4">
           {[
             { i: MapPin, t: "Endereço", c: <p>{ADDRESS}</p> },
             { i: Clock, t: "Horários", c: HOURS_LABEL.map((h) => <p key={h}>{h}</p>) },
             { i: MessageCircle, t: "WhatsApp", c: <a className="text-primary underline" href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noreferrer">(47) 99141-2316</a> },
+            { i: Instagram, t: "Instagram", c: <a className="text-primary underline" href={INSTAGRAM} target="_blank" rel="noreferrer">@barbearia.staudt</a> },
           ].map(({ i: Icon, t, c }) => (
             <div key={t} className="rounded-xl border border-border bg-background/80 p-6 backdrop-blur">
               <Icon className="h-7 w-7 text-primary" />
