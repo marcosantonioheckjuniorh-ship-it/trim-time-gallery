@@ -109,6 +109,25 @@ function Index() {
         </div>
       </section>
 
+      <section id="precos" className="border-y border-border bg-card py-24">
+        <div className="mx-auto max-w-4xl px-5">
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Valores</p>
+          <h2 className="mt-2 text-6xl md:text-7xl">Tabela de <span className="text-gold">preços</span></h2>
+          <div className="mt-12 divide-y divide-border overflow-hidden rounded-xl border border-border bg-background">
+            {prices.map((p) => (
+              <div key={p.id} className="group flex items-baseline justify-between gap-4 px-6 py-5 transition hover:bg-card">
+                <span className="font-display text-2xl tracking-wide md:text-3xl">{p.name}</span>
+                <span className="mx-2 flex-1 border-b border-dotted border-border group-hover:border-primary/50" />
+                <span className="font-display text-2xl text-gold md:text-3xl">
+                  R$ {Number(p.price).toFixed(0)}
+                </span>
+              </div>
+            ))}
+          </div>
+          <p className="mt-6 text-center text-sm text-muted-foreground">Valores sujeitos a alteração. Agende online e garanta seu horário.</p>
+        </div>
+      </section>
+
       <section id="galeria" className="bg-card py-24">
         <div className="mx-auto max-w-6xl px-5">
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Nosso trabalho</p>
