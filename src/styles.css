@@ -51,9 +51,9 @@
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 16%);
   --ring: oklch(0.98 0 0);
-  --gradient-gold: linear-gradient(135deg, oklch(1 0 0), oklch(0.72 0 0));
+  --gradient-gold: linear-gradient(135deg, oklch(0.62 0.24 27), oklch(0.47 0.2 27));
   --gradient-fade: linear-gradient(to top, var(--background) 5%, oklch(0.09 0 0 / 0.55) 55%, oklch(0.09 0 0 / 0.2));
-  --shadow-glow: 0 10px 40px -10px oklch(1 0 0 / 0.4);
+  --shadow-glow: 0 10px 40px -10px oklch(0.62 0.23 27 / 0.55);
 }
 
 @layer base {
