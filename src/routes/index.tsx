@@ -41,8 +41,13 @@ const gallery = [g1, g2, g3, g4, g5, g6, g7, g8, hero];
 
 type PriceRow = { id: string; name: string; price: number };
 
+const INSTAGRAM = "https://www.instagram.com/barbearia.staudt/";
+
 function Index() {
   const [prices, setPrices] = useState<PriceRow[]>([]);
+  const photos = useSitePhotos();
+  const heroImg = photos.find((p) => p.kind === "hero")?.url ?? hero;
+  const gallery = [...photos.filter((p) => p.kind === "gallery").map((p) => p.url), ...baseGallery];
   useEffect(() => {
     supabase.from("services").select("id,name,price").eq("active", true).order("sort").then(({ data }) => setPrices((data as PriceRow[]) ?? []));
   }, []);
