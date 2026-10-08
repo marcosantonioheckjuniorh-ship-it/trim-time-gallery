@@ -12,6 +12,16 @@ import g6 from "@/assets/real7.jpg";
 import g7 from "@/assets/real1.jpg";
 import g8 from "@/assets/real4.jpg";
 import logo from "@/assets/logo.png";
+import newPhoto1 from "@/assets/staudt-corte-01.jpg.asset.json";
+import newPhoto2 from "@/assets/staudt-corte-02.jpg.asset.json";
+import newPhoto3 from "@/assets/staudt-corte-03.jpg.asset.json";
+import newPhoto4 from "@/assets/staudt-corte-04.jpg.asset.json";
+import newPhoto5 from "@/assets/staudt-corte-05.jpg.asset.json";
+import newPhoto6 from "@/assets/staudt-corte-06.jpg.asset.json";
+import newPhoto7 from "@/assets/staudt-corte-07.jpg.asset.json";
+import newPhoto8 from "@/assets/staudt-corte-08.jpg.asset.json";
+import newPhoto9 from "@/assets/staudt-corte-09.jpg.asset.json";
+import newPhoto10 from "@/assets/staudt-corte-10.jpg.asset.json";
 import { BarberPoles } from "@/components/BarberPoles";
 import { useSitePhotos } from "@/lib/photos";
 import { Booking } from "@/components/Booking";
@@ -25,6 +35,8 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Agende seu horário online na Barbearia Staudt. Cortes, barba, luzes, pigmentação, platinado e sobrancelha." },
       { property: "og:title", content: "Barbearia Staudt — Agende seu horário" },
       { property: "og:description", content: "Cortes, barba, luzes, pigmentação, platinado e sobrancelha. Agende online." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Index,
@@ -39,7 +51,8 @@ const services = [
   { t: "Pigmentação", d: "Preenchimento de falhas em barba e cabelo.", img: g7 },
 ];
 
-const baseGallery = [g1, g2, g3, g4, g5, g6, g7, g8, hero];
+const newGallery = [newPhoto1, newPhoto2, newPhoto3, newPhoto4, newPhoto5, newPhoto6, newPhoto7, newPhoto8, newPhoto9, newPhoto10].map((photo) => photo.url);
+const baseGallery = [...newGallery, g1, g2, g3, g4, g5, g6, g7, g8, hero];
 
 type PriceRow = { id: string; name: string; price: number };
 
