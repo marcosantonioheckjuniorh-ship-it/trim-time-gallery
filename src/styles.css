@@ -90,7 +90,7 @@
   border: 1px solid var(--primary); color: var(--primary);
   font-weight: 600; text-transform: uppercase; letter-spacing: .08em;
   padding: .85rem 1.5rem; border-radius: var(--radius); transition: background .2s;
-  &:hover { background: oklch(0.8 0.15 78 / 0.12); }
+  &:hover { background: oklch(1 0 0 / 0.12); }
 }
 @utility field {
   width: 100%; background: var(--muted); border: 1px solid var(--input);
