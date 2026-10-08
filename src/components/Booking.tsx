@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { slotsFor, toISODate, brl, WHATSAPP } from "@/lib/schedule";
+import { slotsFor, toISODate, brl } from "@/lib/schedule";
+import { reserveWhatsAppTab, whatsappUrl } from "@/lib/social";
 
 type Barber = { id: string; name: string };
 type Service = { id: string; name: string; price: number; duration_min: number };
@@ -16,7 +17,7 @@ export function Booking() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [msg, setMsg] = useState<{ ok: boolean; text: string; url?: string } | null>(null);
 
   const [monthOffset, setMonthOffset] = useState(0);
   const [tick, setTick] = useState(0);
@@ -53,15 +54,19 @@ export function Booking() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setMsg(null);
     if (!barber || !service || !date || !time) return setMsg({ ok: false, text: "Escolha serviço, dia e horário." });
     if (name.trim().length < 2 || phone.replace(/\D/g, "").length < 10) return setMsg({ ok: false, text: "Informe seu nome e WhatsApp com DDD." });
     setLoading(true);
+    const whatsappTab = reserveWhatsAppTab();
+    try {
     const { error } = await supabase.from("appointments").insert({
       client_name: name.trim(), client_phone: phone.trim(), barber_id: barber, service_id: service, appt_date: date, appt_time: time,
     });
     setLoading(false);
     if (error) {
+      whatsappTab?.close();
       setMsg({ ok: false, text: error.code === "23505" ? "Esse horário acabou de ser reservado. Escolha outro." : "Não foi possível agendar. Tente novamente." });
       loadBooked();
       return;
@@ -69,10 +74,18 @@ export function Booking() {
     const b = barbers.find((x) => x.id === barber)?.name;
     const s = services.find((x) => x.id === service)?.name;
     const [y, m, d] = date.split("-");
-    const text = encodeURIComponent(`Olá! Agendei ${s} com ${b} no dia ${d}/${m}/${y} às ${time}. Nome: ${name}`);
-    window.open(`https://wa.me/${WHATSAPP}?text=${text}`, "_blank");
-    setMsg({ ok: true, text: `Agendado! ${s} com ${b} em ${d}/${m} às ${time}.|https://wa.me/${WHATSAPP}?text=${text}` });
+    const url = whatsappUrl(`Olá! Agendei ${s} com ${b} no dia ${d}/${m}/${y} às ${time}. Nome: ${name.trim()}`);
+    setMsg({ ok: true, text: `Agendado! ${s} com ${b} em ${d}/${m} às ${time}.`, url });
+    if (whatsappTab && !whatsappTab.closed) {
+      try { whatsappTab.location.replace(url); } catch { whatsappTab.close(); }
+    }
     setTime(""); loadBooked();
+    } catch {
+      whatsappTab?.close();
+      setMsg({ ok: false, text: "Não foi possível verificar a reserva. Confira a agenda antes de tentar novamente." });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const Step = ({ n, t }: { n: number; t: string }) => (
@@ -173,8 +186,8 @@ export function Booking() {
       </div>
       {msg && (
         <div className={`rounded-lg border p-4 ${msg.ok ? "border-success text-success" : "border-destructive text-destructive"}`}>
-          {msg.text.split("|")[0]}
-          {msg.ok && <a href={msg.text.split("|")[1]} target="_blank" rel="noreferrer" className="ml-2 underline">Confirmar no WhatsApp</a>}
+          {msg.text}
+          {msg.ok && msg.url && <a href={msg.url} target="_blank" rel="noopener noreferrer" className="ml-2 underline">Enviar mensagem no WhatsApp</a>}
         </div>
       )}
       <button type="submit" disabled={loading} className="btn-gold w-full">{loading ? "Agendando..." : "Confirmar agendamento"}</button>
