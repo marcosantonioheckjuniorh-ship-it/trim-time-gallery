@@ -129,16 +129,38 @@ export function Booking() {
         ) : slots.length === 0 ? (
           <p className="text-sm text-muted-foreground">Sem horários disponíveis nesse dia.</p>
         ) : (
-          <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
-            {slots.map((s) => {
-              const taken = booked.includes(s);
-              return (
-                <button type="button" key={s} disabled={taken} onClick={() => setTime(s)}
-                  className={`rounded-md border py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:line-through disabled:opacity-30 ${time === s ? "border-primary bg-gold text-primary-foreground" : "border-border hover:border-primary/50"}`}>
-                  {s}{taken && <span className="block text-[10px] uppercase no-underline">Ocupado</span>}
-                </button>
-              );
-            })}
+          <div className="space-y-5">
+            <div>
+              <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-success">
+                <span className="inline-block h-2 w-2 rounded-full bg-success" /> Disponíveis
+              </p>
+              <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
+                {slots.filter((s) => !booked.includes(s)).map((s) => (
+                  <button type="button" key={s} onClick={() => setTime(s)}
+                    className={`rounded-md border py-2 text-sm font-semibold transition ${time === s ? "border-primary bg-gold text-primary-foreground" : "border-border hover:border-primary/50"}`}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+              {slots.every((s) => booked.includes(s)) && (
+                <p className="text-sm text-muted-foreground">Todos os horários desse dia já foram agendados. Escolha outro dia.</p>
+              )}
+            </div>
+            {booked.filter((s) => slots.includes(s)).length > 0 && (
+              <div>
+                <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-destructive">
+                  <span className="inline-block h-2 w-2 rounded-full bg-destructive" /> Já agendados
+                </p>
+                <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
+                  {booked.filter((s) => slots.includes(s)).map((s) => (
+                    <div key={s} className="cursor-not-allowed rounded-md border border-destructive/60 bg-destructive/15 py-2 text-sm font-semibold text-destructive line-through">
+                      {s}
+                      <span className="block text-[10px] uppercase tracking-widest no-underline">Ocupado</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
