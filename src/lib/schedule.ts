@@ -1,15 +1,15 @@
-// Business hours (placeholder until owner confirms). 0 = Sunday.
+// Business hours confirmed by the owner. 0 = Sunday.
 export const HOURS: Record<number, [number, number] | null> = {
   0: null,
-  1: [9, 19],
-  2: [9, 19],
-  3: [9, 19],
-  4: [9, 19],
-  5: [9, 19],
-  6: [8, 17],
+  1: [13.5, 20],
+  2: [9, 20],
+  3: [9, 20],
+  4: [9, 20],
+  5: [9, 20],
+  6: [8, 15],
 };
 
-export const HOURS_LABEL = ["Seg a Sex · 9h às 19h", "Sábado · 8h às 17h", "Domingo · Fechado"];
+export const HOURS_LABEL = ["Segunda · 13h30 às 20h", "Ter a Sex · 9h às 20h", "Sábado · 8h às 15h", "Domingo · Fechado"];
 
 export function slotsFor(dateStr: string): string[] {
   const d = new Date(dateStr + "T12:00:00");
