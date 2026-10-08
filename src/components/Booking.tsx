@@ -53,6 +53,7 @@ export function Booking() {
     if (!barber || !service || !date || !time) return setMsg({ ok: false, text: "Escolha barbeiro, serviço, dia e horário." });
     if (name.trim().length < 2 || phone.replace(/\D/g, "").length < 10) return setMsg({ ok: false, text: "Informe seu nome e WhatsApp com DDD." });
     setLoading(true);
+    const waWin = null as Window | null; void waWin;
     const { error } = await supabase.from("appointments").insert({
       client_name: name.trim(), client_phone: phone.trim(), barber_id: barber, service_id: service, appt_date: date, appt_time: time,
     });
@@ -66,6 +67,7 @@ export function Booking() {
     const s = services.find((x) => x.id === service)?.name;
     const [y, m, d] = date.split("-");
     const text = encodeURIComponent(`Olá! Agendei ${s} com ${b} no dia ${d}/${m}/${y} às ${time}. Nome: ${name}`);
+    window.open(`https://wa.me/${WHATSAPP}?text=${text}`, "_blank");
     setMsg({ ok: true, text: `Agendado! ${s} com ${b} em ${d}/${m} às ${time}.|https://wa.me/${WHATSAPP}?text=${text}` });
     setTime(""); loadBooked();
   };
