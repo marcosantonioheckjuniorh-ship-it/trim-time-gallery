@@ -1,16 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Scissors, MapPin, Clock, MessageCircle, Instagram, Sparkles, Star } from "lucide-react";
+import { MapPin, Clock, MessageCircle, Instagram, Sparkles, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import hero from "@/assets/real-fachada.jpg";
 import g1 from "@/assets/real-corte.jpg";
-import g2 from "@/assets/g2.jpg";
-import g3 from "@/assets/g3.jpg";
-import g4 from "@/assets/g4.jpg";
-import g5 from "@/assets/g5.jpg";
-import g6 from "@/assets/g6.jpg";
-import g7 from "@/assets/g7.jpg";
-import g8 from "@/assets/g8.jpg";
+import g2 from "@/assets/real3.jpg";
+import g3 from "@/assets/real5.jpg";
+import g4 from "@/assets/real2.jpg";
+import g5 from "@/assets/real6.jpg";
+import g6 from "@/assets/real7.jpg";
+import g7 from "@/assets/real1.jpg";
+import g8 from "@/assets/real4.jpg";
+import logo from "@/assets/logo.png";
 import { Booking } from "@/components/Booking";
 import { ADDRESS, HOURS_LABEL, WHATSAPP } from "@/lib/schedule";
 
@@ -35,7 +36,7 @@ const services = [
   { t: "Pigmentação", d: "Preenchimento de falhas em barba e cabelo.", img: g7 },
 ];
 
-const gallery = [g1, g6, g3, g2, g7, g4, g8, g5];
+const gallery = [g1, g2, g3, g4, g5, g6, g7, g8, hero];
 
 type PriceRow = { id: string; name: string; price: number };
 
@@ -49,7 +50,7 @@ function Index() {
       <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
           <a href="#" className="flex items-center gap-2 font-display text-2xl tracking-wider">
-            <Scissors className="h-5 w-5 text-primary" /> STAUDT
+            <img src={logo} alt="Logo Barbearia Staudt" className="h-9 w-9 rounded-full object-cover" /> STAUDT
           </a>
           <nav className="hidden gap-6 text-sm font-semibold uppercase tracking-widest md:flex">
             <a href="#servicos" className="hover:text-primary">Serviços</a>
