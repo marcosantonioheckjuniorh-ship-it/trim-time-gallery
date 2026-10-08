@@ -34,6 +34,16 @@ export function AgendaPublic() {
   const nowHM = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
   const slots = slotsFor(date).filter((s) => date !== toISODate(now) || s > nowHM);
 
+  const free = slots.filter((s) => !booked.includes(s));
+  const taken = slots.filter((s) => booked.includes(s));
+
+  const Slot = ({ s, busy }: { s: string; busy: boolean }) => (
+    <div className={`rounded-md border py-2 text-center text-sm font-semibold ${busy ? "border-destructive/60 bg-destructive/15 text-destructive line-through" : "border-success/60 bg-success/15 text-success"}`}>
+      {s}
+      <span className={`block text-[10px] uppercase tracking-widest no-underline ${busy ? "line-through" : ""}`}>{busy ? "Ocupado" : "Livre"}</span>
+    </div>
+  );
+
   return (
     <div className="rounded-xl border border-border bg-card p-5 md:p-8">
       <div className="mb-6 flex flex-wrap gap-2">
@@ -54,20 +64,34 @@ export function AgendaPublic() {
       {slots.length === 0 ? (
         <p className="text-sm text-muted-foreground">Sem atendimento nesse dia.</p>
       ) : (
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 md:grid-cols-6">
-          {slots.map((s) => {
-            const taken = booked.includes(s);
-            return (
-              <div key={s}
-                className={`rounded-md border py-2 text-center text-sm font-semibold ${taken ? "border-destructive/60 bg-destructive/15 text-destructive" : "border-success/60 bg-success/15 text-success"}`}>
-                {s}
-                <span className="block text-[10px] uppercase tracking-widest">{taken ? "Ocupado" : "Livre"}</span>
+        <div className="space-y-6">
+          <div>
+            <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-success">
+              <span className="inline-block h-2 w-2 rounded-full bg-success" /> Disponíveis ({free.length})
+            </p>
+            {free.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum horário livre nesse dia.</p>
+            ) : (
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 md:grid-cols-6">
+                {free.map((s) => <Slot key={s} s={s} busy={false} />)}
               </div>
-            );
-          })}
+            )}
+          </div>
+          <div>
+            <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-destructive">
+              <span className="inline-block h-2 w-2 rounded-full bg-destructive" /> Já agendados ({taken.length})
+            </p>
+            {taken.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum horário agendado ainda nesse dia.</p>
+            ) : (
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 md:grid-cols-6">
+                {taken.map((s) => <Slot key={s} s={s} busy={true} />)}
+              </div>
+            )}
+          </div>
         </div>
       )}
-      <p className="mt-4 text-xs text-muted-foreground">Atualizado automaticamente. Verde = livre · Vermelho = agendado.</p>
+      <p className="mt-4 text-xs text-muted-foreground">Atualizado automaticamente. Os horários já agendados não podem ser escolhidos.</p>
     </div>
   );
 }
