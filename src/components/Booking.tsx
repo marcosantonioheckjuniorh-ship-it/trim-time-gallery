@@ -33,7 +33,8 @@ export function Booking() {
   useEffect(() => {
     supabase.from("barbers").select("id,name").eq("active", true).order("created_at").then(({ data }) => {
       setBarbers(data ?? []);
-      if (data && data.length > 0) setBarber(data[0].id);
+      const first = data?.[0];
+      if (first) setBarber(first.id);
     });
     supabase.from("services").select("id,name,price,duration_min").eq("active", true).order("sort").then(({ data }) => setServices((data as Service[]) ?? []));
   }, []);
