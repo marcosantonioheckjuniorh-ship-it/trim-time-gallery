@@ -12,6 +12,7 @@ import g6 from "@/assets/real7.jpg";
 import g7 from "@/assets/real1.jpg";
 import g8 from "@/assets/real4.jpg";
 import logo from "@/assets/logo.png";
+import { BarberPoles } from "@/components/BarberPoles";
 import { useSitePhotos } from "@/lib/photos";
 import { Booking } from "@/components/Booking";
 import { AgendaPublic } from "@/components/AgendaPublic";
