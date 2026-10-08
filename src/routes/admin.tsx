@@ -76,6 +76,11 @@ function Login() {
         {msg && <p className="text-sm text-primary">{msg}</p>}
         <button className="btn-gold w-full">{mode === "in" ? "Entrar" : "Criar conta"}</button>
       </form>
+      <button type="button" className="btn-outline mt-3 w-full" onClick={async () => {
+        const { lovable } = await import("@/integrations/lovable");
+        const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: `${window.location.origin}/admin` });
+        if (r.error) setMsg("Não foi possível entrar com o Google.");
+      }}>Entrar / criar conta com Google</button>
       <button className="mt-4 text-sm text-muted-foreground underline" onClick={() => setMode(mode === "in" ? "up" : "in")}>
         {mode === "in" ? "Primeiro acesso? Criar conta" : "Já tenho conta"}
       </button>
