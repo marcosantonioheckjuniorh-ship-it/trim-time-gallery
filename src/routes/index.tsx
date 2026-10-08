@@ -12,6 +12,7 @@ import g6 from "@/assets/real7.jpg";
 import g7 from "@/assets/real1.jpg";
 import g8 from "@/assets/real4.jpg";
 import logo from "@/assets/logo.png";
+import { BarberPoles } from "@/components/BarberPoles";
 import { useSitePhotos } from "@/lib/photos";
 import { Booking } from "@/components/Booking";
 import { AgendaPublic } from "@/components/AgendaPublic";
@@ -195,6 +196,8 @@ function Index() {
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
         © {new Date().getFullYear()} Barbearia Staudt · <Link to="/admin" className="hover:text-primary">Área do dono</Link>
       </footer>
+
+      <BarberPoles />
 
       <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noreferrer" aria-label="WhatsApp"
         className="fixed bottom-5 right-5 z-50 grid h-14 w-14 place-items-center rounded-full bg-success text-primary-foreground shadow-glow">

@@ -100,3 +100,54 @@
 
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @utility animate-marquee { animation: marquee 25s linear infinite; }
+
+/* ===== Poste de barbeiro (barber pole) ===== */
+.pole-side {
+  position: fixed;
+  top: 50%;
+  z-index: 40;
+  display: none;
+  transform: translateY(-50%);
+  filter: drop-shadow(0 10px 24px oklch(0 0 0 / 0.65));
+}
+.pole-side--left { left: 16px; }
+.pole-side--right { right: 16px; }
+@media (min-width: 1320px) { .pole-side { display: block; } }
+
+.pole { display: flex; flex-direction: column; align-items: center; }
+.pole-cap {
+  width: 56px; height: 18px; border-radius: 7px;
+  background: linear-gradient(180deg, #f4f4f5, #a1a1aa 45%, #52525b 55%, #d4d4d8);
+  box-shadow: 0 1px 3px oklch(0 0 0 / 0.5);
+}
+.pole-cap--top { clip-path: polygon(10% 100%, 90% 100%, 100% 0, 0 0); }
+.pole-cap--bottom { clip-path: polygon(0 100%, 100% 100%, 90% 0, 10% 0); }
+.pole-glass {
+  position: relative;
+  width: 44px; height: 210px;
+  overflow: hidden;
+  border-radius: 9999px;
+  border: 3px solid #d4d4d8;
+  background: #f5f5f0;
+  box-shadow: inset 0 0 16px oklch(0 0 0 / 0.45);
+}
+.pole-glass::after {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, oklch(1 0 0 / 0.55), oklch(1 0 0 / 0) 30% 70%, oklch(0 0 0 / 0.35));
+  pointer-events: none;
+}
+.pole-stripes {
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    #c8102e 0 13px,
+    #f5f5f0 13px 26px,
+    #16255c 26px 39px,
+    #f5f5f0 39px 52px
+  );
+  animation: pole-spin 1.4s linear infinite;
+}
+@keyframes pole-spin { to { background-position: 0 73.54px; } }
+@media (prefers-reduced-motion: reduce) { .pole-stripes { animation: none; } }
