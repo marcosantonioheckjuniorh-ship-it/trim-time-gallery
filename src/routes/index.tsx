@@ -2,8 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Scissors, MapPin, Clock, MessageCircle, Instagram, Sparkles, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import hero from "@/assets/hero.jpg";
-import g1 from "@/assets/g1.jpg";
+import hero from "@/assets/real-fachada.jpg";
+import g1 from "@/assets/real-corte.jpg";
 import g2 from "@/assets/g2.jpg";
 import g3 from "@/assets/g3.jpg";
 import g4 from "@/assets/g4.jpg";
@@ -27,10 +27,10 @@ export const Route = createFileRoute("/")({
 });
 
 const services = [
-  { t: "Corte de cabelo", d: "Degradê, social, tesoura — do clássico ao moderno.", img: g1 },
-  { t: "Barba", d: "Toalha quente, navalha e acabamento impecável.", img: g2 },
-  { t: "Platinado", d: "Descoloração completa com cuidado profissional.", img: g3 },
-  { t: "Luzes", d: "Mechas e reflexos para dar estilo ao visual.", img: g4 },
+  { t: "Corte degradê", d: "Degradê, social, tesoura — do clássico ao moderno.", img: g1 },
+  { t: "Barba completa", d: "Toalha quente, navalha e acabamento impecável.", img: g2 },
+  { t: "Corte e Platinado", d: "Descoloração completa com cuidado profissional.", img: g3 },
+  { t: "Corte e Luzes", d: "Mechas e reflexos para dar estilo ao visual.", img: g4 },
   { t: "Sobrancelha", d: "Design na navalha, natural e alinhado.", img: g5 },
   { t: "Pigmentação", d: "Preenchimento de falhas em barba e cabelo.", img: g7 },
 ];
