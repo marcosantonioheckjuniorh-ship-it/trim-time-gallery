@@ -31,7 +31,11 @@ export function Booking() {
   }, [monthStart]);
 
   useEffect(() => {
-    supabase.from("barbers").select("id,name").eq("active", true).order("created_at").then(({ data }) => setBarbers(data ?? []));
+    supabase.from("barbers").select("id,name").eq("active", true).order("created_at").then(({ data }) => {
+      setBarbers(data ?? []);
+      const first = data?.[0];
+      if (first) setBarber(first.id);
+    });
     supabase.from("services").select("id,name,price,duration_min").eq("active", true).order("sort").then(({ data }) => setServices((data as Service[]) ?? []));
   }, []);
 
@@ -50,7 +54,7 @@ export function Booking() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMsg(null);
-    if (!barber || !service || !date || !time) return setMsg({ ok: false, text: "Escolha barbeiro, serviço, dia e horário." });
+    if (!barber || !service || !date || !time) return setMsg({ ok: false, text: "Escolha serviço, dia e horário." });
     if (name.trim().length < 2 || phone.replace(/\D/g, "").length < 10) return setMsg({ ok: false, text: "Informe seu nome e WhatsApp com DDD." });
     setLoading(true);
     const { error } = await supabase.from("appointments").insert({
@@ -80,18 +84,7 @@ export function Booking() {
   return (
     <form onSubmit={submit} className="space-y-8 rounded-xl border border-border bg-card p-5 md:p-8">
       <div>
-        <Step n={1} t="Barbeiro" />
-        <div className="grid grid-cols-2 gap-3">
-          {barbers.map((b) => (
-            <button type="button" key={b.id} onClick={() => setBarber(b.id)}
-              className={`rounded-lg border p-4 text-left font-display text-2xl transition ${barber === b.id ? "border-primary bg-accent text-primary" : "border-border hover:border-primary/50"}`}>
-              {b.name}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div>
-        <Step n={2} t="Serviço" />
+        <Step n={1} t="Serviço" />
         <div className="grid gap-2 sm:grid-cols-2">
           {services.map((s) => (
             <button type="button" key={s.id} onClick={() => setService(s.id)}
@@ -103,7 +96,7 @@ export function Booking() {
         </div>
       </div>
       <div>
-        <Step n={3} t="Dia" />
+        <Step n={2} t="Dia" />
         <div className="rounded-lg border border-border p-3">
           <div className="mb-3 flex items-center justify-between">
             <button type="button" disabled={monthOffset === 0} onClick={() => setMonthOffset((m) => m - 1)} className="rounded-md border border-border px-3 py-1 text-lg disabled:opacity-30">‹</button>
@@ -129,10 +122,10 @@ export function Booking() {
         </div>
       </div>
       <div>
-        <Step n={4} t="Horário" />
-        {barber && date && <p className="mb-2 text-xs text-muted-foreground">Horários atualizados automaticamente em tempo real.</p>}
-        {!barber || !date ? (
-          <p className="text-sm text-muted-foreground">Escolha o barbeiro e o dia para ver os horários livres.</p>
+        <Step n={3} t="Horário" />
+        {date && <p className="mb-2 text-xs text-muted-foreground">Horários atualizados automaticamente em tempo real.</p>}
+        {!date ? (
+          <p className="text-sm text-muted-foreground">Escolha o dia para ver os horários livres.</p>
         ) : slots.length === 0 ? (
           <p className="text-sm text-muted-foreground">Sem horários disponíveis nesse dia.</p>
         ) : (
@@ -150,7 +143,7 @@ export function Booking() {
         )}
       </div>
       <div>
-        <Step n={5} t="Seus dados" />
+        <Step n={4} t="Seus dados" />
         <div className="grid gap-3 sm:grid-cols-2">
           <input className="field" placeholder="Seu nome" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} />
           <input className="field" placeholder="WhatsApp com DDD" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} inputMode="tel" />
