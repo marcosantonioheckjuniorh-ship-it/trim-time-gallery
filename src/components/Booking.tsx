@@ -135,7 +135,7 @@ export function Booking() {
               return (
                 <button type="button" key={s} disabled={taken} onClick={() => setTime(s)}
                   className={`rounded-md border py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:line-through disabled:opacity-30 ${time === s ? "border-primary bg-gold text-primary-foreground" : "border-border hover:border-primary/50"}`}>
-                  {s}
+                  {s}{taken && <span className="block text-[10px] uppercase no-underline">Ocupado</span>}
                 </button>
               );
             })}
