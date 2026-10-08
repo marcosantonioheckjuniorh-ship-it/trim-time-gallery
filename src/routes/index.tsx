@@ -13,6 +13,7 @@ import g7 from "@/assets/real1.jpg";
 import g8 from "@/assets/real4.jpg";
 import logo from "@/assets/logo.png";
 import { Booking } from "@/components/Booking";
+import { AgendaPublic } from "@/components/AgendaPublic";
 import { ADDRESS, HOURS_LABEL, WHATSAPP } from "@/lib/schedule";
 
 export const Route = createFileRoute("/")({
@@ -56,6 +57,7 @@ function Index() {
             <a href="#servicos" className="hover:text-primary">Serviços</a>
             <a href="#precos" className="hover:text-primary">Preços</a>
             <a href="#galeria" className="hover:text-primary">Galeria</a>
+            <a href="#agenda" className="hover:text-primary">Agenda</a>
             <a href="#contato" className="hover:text-primary">Contato</a>
           </nav>
           <a href="#agendar" className="btn-gold !px-4 !py-2 text-xs">Agendar</a>
@@ -151,6 +153,15 @@ function Index() {
         <p className="text-center text-sm font-semibold uppercase tracking-[0.3em] text-primary">Rápido e fácil</p>
         <h2 className="mt-2 text-center text-6xl md:text-7xl">Agende seu <span className="text-gold">horário</span></h2>
         <div className="mt-12"><Booking /></div>
+      </section>
+
+      <section id="agenda" className="border-y border-border bg-card py-24">
+        <div className="mx-auto max-w-4xl px-5">
+          <p className="text-center text-sm font-semibold uppercase tracking-[0.3em] text-primary">Em tempo real</p>
+          <h2 className="mt-2 text-center text-6xl md:text-7xl">Agenda de <span className="text-gold">horários</span></h2>
+          <p className="mx-auto mt-4 max-w-md text-center text-muted-foreground">Veja os horários livres e ocupados dos próximos 7 dias antes de agendar.</p>
+          <div className="mt-12"><AgendaPublic /></div>
+        </div>
       </section>
 
       <section id="contato" className="relative">
