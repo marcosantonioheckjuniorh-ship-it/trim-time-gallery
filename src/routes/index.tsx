@@ -37,7 +37,13 @@ const services = [
 
 const gallery = [g1, g6, g3, g2, g7, g4, g8, g5];
 
+type PriceRow = { id: string; name: string; price: number };
+
 function Index() {
+  const [prices, setPrices] = useState<PriceRow[]>([]);
+  useEffect(() => {
+    supabase.from("services").select("id,name,price").eq("active", true).order("sort").then(({ data }) => setPrices((data as PriceRow[]) ?? []));
+  }, []);
   return (
     <div className="overflow-x-hidden">
       <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/80 backdrop-blur">
