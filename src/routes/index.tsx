@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Scissors, MapPin, Clock, MessageCircle, Instagram, Sparkles, Star } from "lucide-react";
+import { MapPin, Clock, MessageCircle, Instagram, Sparkles, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import hero from "@/assets/real-fachada.jpg";
 import g1 from "@/assets/real-corte.jpg";
