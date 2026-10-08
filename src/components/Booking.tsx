@@ -18,12 +18,17 @@ export function Booking() {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
-  const days = useMemo(() => {
-    const arr: Date[] = [];
-    const t = new Date();
-    for (let i = 0; i < 14; i++) arr.push(new Date(t.getFullYear(), t.getMonth(), t.getDate() + i));
+  const [monthOffset, setMonthOffset] = useState(0);
+  const [tick, setTick] = useState(0);
+  useEffect(() => { const id = setInterval(() => setTick((t) => t + 1), 20000); return () => clearInterval(id); }, []);
+  const todayISO = toISODate(new Date());
+  const monthStart = useMemo(() => { const t = new Date(); return new Date(t.getFullYear(), t.getMonth() + monthOffset, 1); }, [monthOffset, todayISO]);
+  const calendar = useMemo(() => {
+    const arr: (Date | null)[] = Array(monthStart.getDay()).fill(null);
+    const last = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0).getDate();
+    for (let i = 1; i <= last; i++) arr.push(new Date(monthStart.getFullYear(), monthStart.getMonth(), i));
     return arr;
-  }, []);
+  }, [monthStart]);
 
   useEffect(() => {
     supabase.from("barbers").select("id,name").eq("active", true).order("created_at").then(({ data }) => setBarbers(data ?? []));
@@ -36,6 +41,8 @@ export function Booking() {
     setBooked(((data as string[]) ?? []).map((t) => t.slice(0, 5)));
   };
   useEffect(() => { loadBooked(); setTime(""); }, [barber, date]);
+  useEffect(() => { if (tick) loadBooked(); }, [tick]);
+  useEffect(() => { if (time && booked.includes(time)) setTime(""); }, [booked]);
 
   const now = new Date();
   const slots = date ? slotsFor(date).filter((s) => date !== toISODate(now) || s > `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`) : [];
@@ -96,22 +103,33 @@ export function Booking() {
       </div>
       <div>
         <Step n={3} t="Dia" />
-        <div className="flex gap-2 overflow-x-auto pb-2">
-          {days.map((d) => {
-            const iso = toISODate(d);
-            const closed = slotsFor(iso).length === 0;
-            return (
-              <button type="button" key={iso} disabled={closed} onClick={() => setDate(iso)}
-                className={`min-w-16 shrink-0 rounded-lg border px-3 py-2 text-center transition disabled:opacity-30 ${date === iso ? "border-primary bg-gold text-primary-foreground" : "border-border hover:border-primary/50"}`}>
-                <div className="text-xs uppercase">{d.toLocaleDateString("pt-BR", { weekday: "short" }).replace(".", "")}</div>
-                <div className="font-display text-2xl">{d.getDate()}</div>
-              </button>
-            );
-          })}
+        <div className="rounded-lg border border-border p-3">
+          <div className="mb-3 flex items-center justify-between">
+            <button type="button" disabled={monthOffset === 0} onClick={() => setMonthOffset((m) => m - 1)} className="rounded-md border border-border px-3 py-1 text-lg disabled:opacity-30">‹</button>
+            <span className="font-display text-2xl capitalize">{monthStart.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}</span>
+            <button type="button" disabled={monthOffset >= 2} onClick={() => setMonthOffset((m) => m + 1)} className="rounded-md border border-border px-3 py-1 text-lg disabled:opacity-30">›</button>
+          </div>
+          <div className="grid grid-cols-7 gap-1 text-center text-xs uppercase text-muted-foreground">
+            {["D", "S", "T", "Q", "Q", "S", "S"].map((w, i) => <div key={i} className="py-1">{w}</div>)}
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {calendar.map((d, i) => {
+              if (!d) return <div key={i} />;
+              const iso = toISODate(d);
+              const closed = slotsFor(iso).length === 0 || iso < todayISO;
+              return (
+                <button type="button" key={iso} disabled={closed} onClick={() => setDate(iso)}
+                  className={`aspect-square rounded-md border font-display text-xl transition disabled:border-transparent disabled:opacity-25 ${date === iso ? "border-primary bg-gold text-primary-foreground" : iso === todayISO ? "border-primary/60" : "border-border hover:border-primary/50"}`}>
+                  {d.getDate()}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
       <div>
         <Step n={4} t="Horário" />
+        {barber && date && <p className="mb-2 text-xs text-muted-foreground">Horários atualizados automaticamente em tempo real.</p>}
         {!barber || !date ? (
           <p className="text-sm text-muted-foreground">Escolha o barbeiro e o dia para ver os horários livres.</p>
         ) : slots.length === 0 ? (
