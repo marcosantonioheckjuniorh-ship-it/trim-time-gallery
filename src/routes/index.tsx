@@ -197,6 +197,8 @@ function Index() {
         © {new Date().getFullYear()} Barbearia Staudt · <Link to="/admin" className="hover:text-primary">Área do dono</Link>
       </footer>
 
+      <BarberPoles />
+
       <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noreferrer" aria-label="WhatsApp"
         className="fixed bottom-5 right-5 z-50 grid h-14 w-14 place-items-center rounded-full bg-success text-primary-foreground shadow-glow">
         <MessageCircle className="h-7 w-7" />
