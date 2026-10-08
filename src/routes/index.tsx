@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Scissors, MapPin, Clock, MessageCircle, Instagram, Sparkles, Star } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import hero from "@/assets/hero.jpg";
 import g1 from "@/assets/g1.jpg";
 import g2 from "@/assets/g2.jpg";
@@ -35,7 +37,13 @@ const services = [
 
 const gallery = [g1, g6, g3, g2, g7, g4, g8, g5];
 
+type PriceRow = { id: string; name: string; price: number };
+
 function Index() {
+  const [prices, setPrices] = useState<PriceRow[]>([]);
+  useEffect(() => {
+    supabase.from("services").select("id,name,price").eq("active", true).order("sort").then(({ data }) => setPrices((data as PriceRow[]) ?? []));
+  }, []);
   return (
     <div className="overflow-x-hidden">
       <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/80 backdrop-blur">
@@ -45,6 +53,7 @@ function Index() {
           </a>
           <nav className="hidden gap-6 text-sm font-semibold uppercase tracking-widest md:flex">
             <a href="#servicos" className="hover:text-primary">Serviços</a>
+            <a href="#precos" className="hover:text-primary">Preços</a>
             <a href="#galeria" className="hover:text-primary">Galeria</a>
             <a href="#contato" className="hover:text-primary">Contato</a>
           </nav>
@@ -98,6 +107,25 @@ function Index() {
               </div>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section id="precos" className="border-y border-border bg-card py-24">
+        <div className="mx-auto max-w-4xl px-5">
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Valores</p>
+          <h2 className="mt-2 text-6xl md:text-7xl">Tabela de <span className="text-gold">preços</span></h2>
+          <div className="mt-12 divide-y divide-border overflow-hidden rounded-xl border border-border bg-background">
+            {prices.map((p) => (
+              <div key={p.id} className="group flex items-baseline justify-between gap-4 px-6 py-5 transition hover:bg-card">
+                <span className="font-display text-2xl tracking-wide md:text-3xl">{p.name}</span>
+                <span className="mx-2 flex-1 border-b border-dotted border-border group-hover:border-primary/50" />
+                <span className="font-display text-2xl text-gold md:text-3xl">
+                  R$ {Number(p.price).toFixed(0)}
+                </span>
+              </div>
+            ))}
+          </div>
+          <p className="mt-6 text-center text-sm text-muted-foreground">Valores sujeitos a alteração. Agende online e garanta seu horário.</p>
         </div>
       </section>
 
