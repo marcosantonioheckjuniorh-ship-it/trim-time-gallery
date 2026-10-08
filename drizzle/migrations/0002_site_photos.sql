@@ -1,0 +1,10 @@
+CREATE TABLE public.site_photos (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), path text NOT NULL, kind text NOT NULL DEFAULT 'gallery', sort integer NOT NULL DEFAULT 0, created_at timestamptz NOT NULL DEFAULT now());
+GRANT SELECT ON public.site_photos TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.site_photos TO authenticated;
+GRANT ALL ON public.site_photos TO service_role;
+ALTER TABLE public.site_photos ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "public read photos" ON public.site_photos FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY "admin manage photos" ON public.site_photos FOR ALL TO authenticated USING (public.has_role(auth.uid(),'admin')) WITH CHECK (public.has_role(auth.uid(),'admin'));
+CREATE POLICY "read photo files" ON storage.objects FOR SELECT TO anon, authenticated USING (bucket_id='photos');
+CREATE POLICY "admin upload photo files" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id='photos' AND public.has_role(auth.uid(),'admin'));
+CREATE POLICY "admin delete photo files" ON storage.objects FOR DELETE TO authenticated USING (bucket_id='photos' AND public.has_role(auth.uid(),'admin'));

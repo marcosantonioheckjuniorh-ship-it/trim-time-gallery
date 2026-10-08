@@ -113,6 +113,30 @@ export type Database = {
         }
         Relationships: []
       }
+      site_photos: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          path: string
+          sort: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string
+          path: string
+          sort?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          path?: string
+          sort?: number
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
