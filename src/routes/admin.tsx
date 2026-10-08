@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { brl, toISODate } from "@/lib/schedule";
-import { LogOut, Scissors, Calendar, Tag, Users, MessageCircle } from "lucide-react";
+import { LogOut, Scissors, Calendar, Tag, Users, MessageCircle, Image as ImageIcon } from "lucide-react";
+import { loadSitePhotos, type SitePhoto } from "@/lib/photos";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -76,11 +77,6 @@ function Login() {
         {msg && <p className="text-sm text-primary">{msg}</p>}
         <button className="btn-gold w-full">{mode === "in" ? "Entrar" : "Criar conta"}</button>
       </form>
-      <button type="button" className="btn-outline mt-3 w-full" onClick={async () => {
-        const { lovable } = await import("@/integrations/lovable");
-        const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: `${window.location.origin}/admin` });
-        if (r.error) setMsg("Não foi possível entrar com o Google.");
-      }}>Entrar / criar conta com Google</button>
       <button className="mt-4 text-sm text-muted-foreground underline" onClick={() => setMode(mode === "in" ? "up" : "in")}>
         {mode === "in" ? "Primeiro acesso? Criar conta" : "Já tenho conta"}
       </button>
@@ -94,7 +90,7 @@ type Barber = { id: string; name: string; active: boolean };
 type Service = { id: string; name: string; price: number; duration_min: number; active: boolean; sort: number };
 
 function Panel({ email }: { email: string }) {
-  const [tab, setTab] = useState<"agenda" | "servicos" | "barbeiros">("agenda");
+  const [tab, setTab] = useState<"agenda" | "servicos" | "fotos" | "barbeiros">("agenda");
   const [barbers, setBarbers] = useState<Barber[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const loadBase = async () => {
@@ -108,7 +104,8 @@ function Panel({ email }: { email: string }) {
 
   const tabs = [
     { k: "agenda", l: "Agenda", i: Calendar },
-    { k: "servicos", l: "Serviços", i: Tag },
+    { k: "servicos", l: "Preços", i: Tag },
+    { k: "fotos", l: "Fotos", i: ImageIcon },
     { k: "barbeiros", l: "Barbeiros", i: Users },
   ] as const;
 
@@ -122,7 +119,7 @@ function Panel({ email }: { email: string }) {
             <button onClick={() => supabase.auth.signOut()} className="flex items-center gap-1 hover:text-primary"><LogOut className="h-4 w-4" /> Sair</button>
           </div>
         </div>
-        <nav className="mx-auto flex max-w-6xl gap-1 px-5">
+        <nav className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-5">
           {tabs.map(({ k, l, i: Icon }) => (
             <button key={k} onClick={() => setTab(k)} className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold uppercase tracking-wider ${tab === k ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}>
               <Icon className="h-4 w-4" />{l}
@@ -133,6 +130,7 @@ function Panel({ email }: { email: string }) {
       <main className="mx-auto max-w-6xl px-5 py-8">
         {tab === "agenda" && <Agenda barbers={barbers} services={services} />}
         {tab === "servicos" && <Services services={services} reload={loadBase} />}
+        {tab === "fotos" && <Photos />}
         {tab === "barbeiros" && <Barbers barbers={barbers} reload={loadBase} />}
       </main>
     </div>
@@ -251,6 +249,58 @@ function BarberRow({ b, reload }: { b: Barber; reload: () => void }) {
       <input className="field min-w-40 flex-1" value={v.name} onChange={(e) => setV({ ...v, name: e.target.value })} />
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={v.active} onChange={(e) => setV({ ...v, active: e.target.checked })} /> Atendendo</label>
       <button onClick={save} className="btn-gold !px-4 !py-2 text-xs">Salvar</button>
+    </div>
+  );
+}
+
+function Photos() {
+  const [photos, setPhotos] = useState<SitePhoto[]>([]);
+  const [busy, setBusy] = useState("");
+  const load = () => loadSitePhotos().then(setPhotos);
+  useEffect(() => { load(); }, []);
+  const upload = async (files: FileList | null, kind: string) => {
+    if (!files?.length) return;
+    setBusy("Enviando...");
+    for (const f of Array.from(files)) {
+      const path = `${kind}/${Date.now()}-${Math.random().toString(36).slice(2)}.${f.name.split(".").pop() || "jpg"}`;
+      const { error } = await supabase.storage.from("photos").upload(path, f, { contentType: f.type });
+      if (error) { setBusy("Erro ao enviar: " + error.message); return; }
+      if (kind === "hero") {
+        const old = photos.filter((p) => p.kind === "hero");
+        if (old.length) { await supabase.storage.from("photos").remove(old.map((p) => p.path)); await supabase.from("site_photos").delete().in("id", old.map((p) => p.id)); }
+      }
+      await supabase.from("site_photos").insert({ path, kind });
+    }
+    setBusy(""); load();
+  };
+  const del = async (p: SitePhoto) => {
+    if (!confirm("Excluir esta foto?")) return;
+    await supabase.storage.from("photos").remove([p.path]);
+    await supabase.from("site_photos").delete().eq("id", p.id); load();
+  };
+  const hero = photos.find((p) => p.kind === "hero");
+  const gallery = photos.filter((p) => p.kind === "gallery");
+  return (
+    <div className="space-y-10">
+      {busy && <p className="text-primary">{busy}</p>}
+      <section>
+        <h2 className="text-4xl">Foto principal (topo do site)</h2>
+        <p className="text-sm text-muted-foreground">Substitui a foto grande do início. Excluindo, volta a foto original.</p>
+        {hero && <div className="relative mt-4 max-w-md"><img src={hero.url} alt="" className="aspect-video w-full rounded-lg object-cover" /><button onClick={() => del(hero)} className="absolute right-2 top-2 rounded-md bg-destructive px-3 py-1 text-xs text-destructive-foreground">Excluir</button></div>}
+        <label className="btn-gold mt-4 inline-flex cursor-pointer">Trocar foto principal<input type="file" accept="image/*" hidden onChange={(e) => upload(e.target.files, "hero")} /></label>
+      </section>
+      <section>
+        <h2 className="text-4xl">Galeria</h2>
+        <p className="text-sm text-muted-foreground">Fotos novas aparecem primeiro na galeria do site.</p>
+        <label className="btn-gold mt-4 inline-flex cursor-pointer">+ Adicionar fotos<input type="file" accept="image/*" multiple hidden onChange={(e) => upload(e.target.files, "gallery")} /></label>
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {gallery.map((p) => (
+            <div key={p.id} className="relative"><img src={p.url} alt="" className="aspect-square w-full rounded-lg object-cover" />
+              <button onClick={() => del(p)} className="absolute right-2 top-2 rounded-md bg-destructive px-3 py-1 text-xs text-destructive-foreground">Excluir</button></div>
+          ))}
+          {!gallery.length && <p className="col-span-full text-muted-foreground">Nenhuma foto enviada ainda.</p>}
+        </div>
+      </section>
     </div>
   );
 }
