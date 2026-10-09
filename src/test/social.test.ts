@@ -5,8 +5,8 @@ describe("WhatsApp handoff", () => {
   it("preserves appointment details and the destination number", () => {
     const message = "Olá! Agendei Corte degradê no dia 09/10/2026 às 10:00. Nome: João";
     const url = new URL(whatsappUrl(message));
-    expect(url.origin).toBe("https://api.whatsapp.com");
-    expect(url.searchParams.get("phone")).toBe("554791412316");
+    expect(url.origin).toBe("https://wa.me");
+    expect(url.pathname).toBe("/554791412316");
     expect(url.searchParams.get("text")).toBe(message);
   });
 
