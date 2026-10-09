@@ -29,6 +29,6 @@ export function toISODate(d: Date) {
   return `${y}-${m}-${day}`;
 }
 
-export const WHATSAPP = "5547991412316";
+export const WHATSAPP = "554791412316";
 export const ADDRESS = "Rua São Pedro, 833 – Sala 4";
 export const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
