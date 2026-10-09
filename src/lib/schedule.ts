@@ -17,7 +17,7 @@ export const DEFAULT_SCHEDULE: ScheduleConfig = { hours: DEFAULT_HOURS, special:
 
 export const WEEKDAYS = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 
-const toMin = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + (m || 0); };
+const toMin = (t: string) => { const [h = 0, m = 0] = t.split(":").map(Number); return h * 60 + m; };
 const fmt = (m: number) => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 
 /** Returns opening window for a date, honoring holidays / special days first. */
@@ -48,7 +48,7 @@ export function hoursLabel(hours: WeekHours): string[] {
     const h = hours[at(i)];
     let j = i;
     while (j + 1 < order.length && JSON.stringify(hours[at(j + 1)]) === JSON.stringify(h)) j++;
-    const name = i === j ? WEEKDAYS[at(i)] : `${WEEKDAYS[at(i)].slice(0, 3)} a ${WEEKDAYS[at(j)].slice(0, 3)}`;
+    const name = i === j ? WEEKDAYS[at(i)] : `${(WEEKDAYS[at(i)] ?? "").slice(0, 3)} a ${(WEEKDAYS[at(j)] ?? "").slice(0, 3)}`;
     lines.push(`${name} · ${h ? `${pretty(h[0])} às ${pretty(h[1])}` : "Fechado"}`);
     i = j + 1;
   }
