@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Store newly added gallery media in Lovable Assets and import its generated JSON pointers; this keeps uploaded binaries out of the repository.
+- Keep public social destinations in src/lib/social.ts and reserve WhatsApp tabs during the submit gesture, before asynchronous saves, to avoid popup blockers while retaining a clickable fallback.

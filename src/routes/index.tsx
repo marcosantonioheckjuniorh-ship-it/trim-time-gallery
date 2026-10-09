@@ -26,7 +26,8 @@ import { BarberPoles } from "@/components/BarberPoles";
 import { useSitePhotos } from "@/lib/photos";
 import { Booking } from "@/components/Booking";
 import { AgendaPublic } from "@/components/AgendaPublic";
-import { ADDRESS, HOURS_LABEL, WHATSAPP } from "@/lib/schedule";
+import { ADDRESS, HOURS_LABEL } from "@/lib/schedule";
+import { INSTAGRAM, whatsappUrl } from "@/lib/social";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -56,7 +57,7 @@ const baseGallery = [...newGallery, g1, g2, g3, g4, g5, g6, g7, g8, hero];
 
 type PriceRow = { id: string; name: string; price: number };
 
-const INSTAGRAM = "https://www.instagram.com/barbearia.staudt/";
+const WHATSAPP_LINK = whatsappUrl("Olá! Quero agendar um horário na Barbearia Staudt.");
 
 function Index() {
   const [prices, setPrices] = useState<PriceRow[]>([]);
@@ -100,7 +101,7 @@ function Index() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a href="#agendar" className="btn-gold">Agendar horário</a>
-            <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noreferrer" className="btn-outline">
+            <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" className="btn-outline">
               <MessageCircle className="h-4 w-4" /> WhatsApp
             </a>
             <a href={INSTAGRAM} target="_blank" rel="noreferrer" className="btn-outline">
@@ -194,7 +195,7 @@ function Index() {
           {[
             { i: MapPin, t: "Endereço", c: <p>{ADDRESS}</p> },
             { i: Clock, t: "Horários", c: HOURS_LABEL.map((h) => <p key={h}>{h}</p>) },
-            { i: MessageCircle, t: "WhatsApp", c: <a className="text-primary underline" href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noreferrer">(47) 99141-2316</a> },
+            { i: MessageCircle, t: "WhatsApp", c: <a className="text-primary underline" href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer">(47) 99141-2316</a> },
             { i: Instagram, t: "Instagram", c: <a className="text-primary underline" href={INSTAGRAM} target="_blank" rel="noreferrer">@barbearia.staudt</a> },
           ].map(({ i: Icon, t, c }) => (
             <div key={t} className="rounded-xl border border-border bg-background/80 p-6 backdrop-blur">
@@ -212,7 +213,7 @@ function Index() {
 
       <BarberPoles />
 
-      <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noreferrer" aria-label="WhatsApp"
+      <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"
         className="fixed bottom-5 right-5 z-50 grid h-14 w-14 place-items-center rounded-full bg-success text-primary-foreground shadow-glow">
         <MessageCircle className="h-7 w-7" />
       </a>
