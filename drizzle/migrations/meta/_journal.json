@@ -36,6 +36,13 @@
       "when": 1791505394073,
       "tag": "0004_special_days",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791560767659,
+      "tag": "0005_create_customer_reviews_fixed",
+      "breakpoints": true
     }
   ]
 }
