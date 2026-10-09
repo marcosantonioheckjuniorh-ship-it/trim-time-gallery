@@ -197,7 +197,6 @@ export type Database = {
         }
         Relationships: []
       }
-    }
       reviews: {
         Row: {
           comment: string
@@ -228,6 +227,7 @@ export type Database = {
         }
         Relationships: []
       }
+    }
     Views: {
       [_ in never]: never
     }
