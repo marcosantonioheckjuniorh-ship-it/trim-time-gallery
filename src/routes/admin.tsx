@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { brl, toISODate, WEEKDAYS } from "@/lib/schedule";
-import { LogOut, Scissors, Calendar, Tag, Users, MessageCircle, Image as ImageIcon, Clock, CalendarOff } from "lucide-react";
+import { LogOut, Scissors, Calendar, Tag, Users, MessageCircle, Image as ImageIcon, Clock, CalendarOff, Star } from "lucide-react";
 import { loadSitePhotos, type SitePhoto } from "@/lib/photos";
 import { AdminLogin } from "@/components/AdminLogin";
 
@@ -71,7 +71,7 @@ type Barber = { id: string; name: string; active: boolean };
 type Service = { id: string; name: string; price: number; duration_min: number; active: boolean; sort: number };
 
 function Panel({ email }: { email: string }) {
-  const [tab, setTab] = useState<"agenda" | "horarios" | "folgas" | "servicos" | "fotos" | "barbeiros">("agenda");
+  const [tab, setTab] = useState<"agenda" | "horarios" | "folgas" | "servicos" | "fotos" | "barbeiros" | "avaliacoes">("agenda");
   const [barbers, setBarbers] = useState<Barber[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const loadBase = async () => {
@@ -90,6 +90,7 @@ function Panel({ email }: { email: string }) {
     { k: "servicos", l: "Preços", i: Tag },
     { k: "fotos", l: "Fotos", i: ImageIcon },
     { k: "barbeiros", l: "Barbeiros", i: Users },
+    { k: "avaliacoes", l: "Avaliações", i: Star },
   ] as const;
 
   return (
@@ -117,6 +118,7 @@ function Panel({ email }: { email: string }) {
         {tab === "servicos" && <Services services={services} reload={loadBase} />}
         {tab === "fotos" && <Photos />}
         {tab === "barbeiros" && <Barbers barbers={barbers} reload={loadBase} />}
+        {tab === "avaliacoes" && <ReviewsAdmin />}
       </main>
     </div>
   );
@@ -415,5 +417,96 @@ function SpecialDays() {
         ))}
       </div>
     </div>
+  );
+}
+
+
+type ReviewRecord = { id: string; name: string; rating: number; comment: string; response: string | null; status: "pending" | "approved" | "rejected"; created_at: string };
+
+function ReviewsAdmin() {
+  const [reviews, setReviews] = useState<ReviewRecord[]>([]);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [msg, setMsg] = useState("");
+  const load = async () => {
+    const { data, error } = await supabase.from("reviews").select("*").order("created_at", { ascending: false });
+    if (error) setMsg("Não foi possível carregar as avaliações: " + error.message);
+    else setReviews((data as ReviewRecord[]) ?? []);
+  };
+  useEffect(() => { void load(); }, []);
+  const changeStatus = async (id: string, status: ReviewRecord["status"]) => {
+    setBusy(id); setMsg("");
+    const { error } = await supabase.from("reviews").update({ status }).eq("id", id);
+    setBusy(null);
+    if (error) setMsg("Não foi possível atualizar: " + error.message);
+    else { setMsg(status === "approved" ? "Avaliação publicada no site." : status === "rejected" ? "Avaliação recusada." : "Avaliação atualizada."); await load(); }
+  };
+  const saveResponse = async (review: ReviewRecord, response: string) => {
+    setBusy(review.id); setMsg("");
+    const { error } = await supabase.from("reviews").update({ response: response.trim() || null }).eq("id", review.id);
+    setBusy(null);
+    if (error) setMsg("Não foi possível salvar a resposta: " + error.message);
+    else { setMsg("Resposta salva."); await load(); }
+  };
+  const remove = async (id: string) => {
+    if (!confirm("Excluir permanentemente esta avaliação?")) return;
+    const { error } = await supabase.from("reviews").delete().eq("id", id);
+    if (error) setMsg("Não foi possível excluir: " + error.message);
+    else { setMsg("Avaliação excluída."); await load(); }
+  };
+  const labels: Record<string, string> = { pending: "Aguardando aprovação", approved: "Publicada", rejected: "Recusada" };
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-4xl">Avaliações dos clientes</h2>
+        <p className="mt-2 text-sm text-muted-foreground">As avaliações só aparecem publicamente depois que você aprovar. Você também pode responder aos clientes.</p>
+      </div>
+      {msg && <p role="status" className="rounded-lg border border-border bg-card p-3 text-sm">{msg}</p>}
+      <div className="grid grid-cols-3 gap-3">
+        {(["pending", "approved", "rejected"] as const).map((status) => (
+          <div key={status} className="rounded-xl border border-border bg-card p-4">
+            <p className="text-xs uppercase tracking-widest text-muted-foreground">{labels[status]}</p>
+            <p className="mt-1 font-display text-3xl">{reviews.filter((r) => r.status === status).length}</p>
+          </div>
+        ))}
+      </div>
+      {!reviews.length && <p className="rounded-xl border border-border bg-card p-6 text-muted-foreground">Nenhuma avaliação recebida ainda.</p>}
+      <div className="space-y-4">
+        {reviews.map((r) => <ReviewAdminCard key={r.id} review={r} busy={busy === r.id} onStatus={changeStatus} onResponse={saveResponse} onDelete={remove} label={labels[r.status]} />)}
+      </div>
+    </div>
+  );
+}
+
+function ReviewAdminCard({ review, busy, onStatus, onResponse, onDelete, label }: {
+  review: ReviewRecord; busy: boolean; label: string;
+  onStatus: (id: string, status: ReviewRecord["status"]) => void;
+  onResponse: (review: ReviewRecord, response: string) => void;
+  onDelete: (id: string) => void;
+}) {
+  const [response, setResponse] = useState(review.response ?? "");
+  useEffect(() => setResponse(review.response ?? ""), [review.response]);
+  return (
+    <article className="rounded-xl border border-border bg-card p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="font-semibold">{review.name}</p>
+          <div className="mt-1 flex items-center gap-1 text-primary" aria-label={review.rating + " de 5 estrelas"}>
+            {Array.from({ length: 5 }, (_, i) => <Star key={i} className={`h-4 w-4 ${i < review.rating ? "fill-current" : "opacity-30"}`} />)}
+            <span className="ml-2 text-xs text-muted-foreground">{new Date(review.created_at).toLocaleDateString("pt-BR")}</span>
+          </div>
+        </div>
+        <span className="rounded-full border border-border px-3 py-1 text-xs">{label}</span>
+      </div>
+      <p className="mt-4 whitespace-pre-wrap text-sm leading-6">{review.comment}</p>
+      <label className="mt-4 block text-sm font-medium">Resposta pública do estabelecimento
+        <textarea className="field mt-2 min-h-20 w-full" maxLength={500} value={response} onChange={(e) => setResponse(e.target.value)} placeholder="Escreva uma resposta (opcional)..." />
+      </label>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {review.status !== "approved" && <button disabled={busy} onClick={() => onStatus(review.id, "approved")} className="btn-gold !px-4 !py-2 text-xs">Aprovar e publicar</button>}
+        {review.status !== "rejected" && <button disabled={busy} onClick={() => onStatus(review.id, "rejected")} className="btn-outline !px-4 !py-2 text-xs">Recusar</button>}
+        <button disabled={busy} onClick={() => onResponse(review, response)} className="btn-outline !px-4 !py-2 text-xs">Salvar resposta</button>
+        <button disabled={busy} onClick={() => onDelete(review.id)} className="px-3 py-2 text-xs text-destructive">Excluir</button>
+      </div>
+    </article>
   );
 }
