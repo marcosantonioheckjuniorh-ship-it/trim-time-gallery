@@ -23,6 +23,7 @@ import newPhoto8 from "@/assets/staudt-corte-08.jpg.asset.json";
 import newPhoto9 from "@/assets/staudt-corte-09.jpg.asset.json";
 import newPhoto10 from "@/assets/staudt-corte-10.jpg.asset.json";
 import { BarberPoles } from "@/components/BarberPoles";
+import { ReviewsSection } from "@/components/ReviewsSection";
 import { useSitePhotos } from "@/lib/photos";
 import { Booking } from "@/components/Booking";
 import { AgendaPublic } from "@/components/AgendaPublic";
@@ -81,6 +82,7 @@ function Index() {
             <a href="#precos" className="hover:text-primary">Preços</a>
             <a href="#galeria" className="hover:text-primary">Galeria</a>
             <a href="#agenda" className="hover:text-primary">Agenda</a>
+            <a href="#avaliacoes" className="hover:text-primary">Avaliações</a>
             <a href="#contato" className="hover:text-primary">Contato</a>
             <a href={INSTAGRAM} target="_blank" rel="noreferrer" aria-label="Instagram" className="hover:text-primary"><Instagram className="h-5 w-5" /></a>
           </nav>
@@ -190,6 +192,8 @@ function Index() {
           <div className="mt-12"><AgendaPublic /></div>
         </div>
       </section>
+
+      <ReviewsSection />
 
       <section id="contato" className="relative">
         <img src={g6} alt="Interior da Barbearia Staudt" loading="lazy" width={1024} height={1024} className="absolute inset-0 h-full w-full object-cover opacity-30" />
