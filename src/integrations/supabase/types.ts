@@ -104,6 +104,36 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          comment: string
+          created_at: string
+          id: string
+          name: string
+          rating: number
+          response: string | null
+          status: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          id?: string
+          name: string
+          rating: number
+          response?: string | null
+          status?: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          id?: string
+          name?: string
+          rating?: number
+          response?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           active: boolean
