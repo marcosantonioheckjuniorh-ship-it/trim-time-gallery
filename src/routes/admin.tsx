@@ -2,8 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { brl, toISODate } from "@/lib/schedule";
-import { LogOut, Scissors, Calendar, Tag, Users, MessageCircle, Image as ImageIcon } from "lucide-react";
+import { brl, toISODate, WEEKDAYS } from "@/lib/schedule";
+import { LogOut, Scissors, Calendar, Tag, Users, MessageCircle, Image as ImageIcon, Clock, CalendarOff } from "lucide-react";
 import { loadSitePhotos, type SitePhoto } from "@/lib/photos";
 
 export const Route = createFileRoute("/admin")({
@@ -93,7 +93,7 @@ type Barber = { id: string; name: string; active: boolean };
 type Service = { id: string; name: string; price: number; duration_min: number; active: boolean; sort: number };
 
 function Panel({ email }: { email: string }) {
-  const [tab, setTab] = useState<"agenda" | "servicos" | "fotos" | "barbeiros">("agenda");
+  const [tab, setTab] = useState<"agenda" | "horarios" | "folgas" | "servicos" | "fotos" | "barbeiros">("agenda");
   const [barbers, setBarbers] = useState<Barber[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const loadBase = async () => {
@@ -107,6 +107,8 @@ function Panel({ email }: { email: string }) {
 
   const tabs = [
     { k: "agenda", l: "Agenda", i: Calendar },
+    { k: "horarios", l: "Horários", i: Clock },
+    { k: "folgas", l: "Feriados e folgas", i: CalendarOff },
     { k: "servicos", l: "Preços", i: Tag },
     { k: "fotos", l: "Fotos", i: ImageIcon },
     { k: "barbeiros", l: "Barbeiros", i: Users },
@@ -132,6 +134,8 @@ function Panel({ email }: { email: string }) {
       </header>
       <main className="mx-auto max-w-6xl px-5 py-8">
         {tab === "agenda" && <Agenda barbers={barbers} services={services} />}
+        {tab === "horarios" && <WeekHoursEditor />}
+        {tab === "folgas" && <SpecialDays />}
         {tab === "servicos" && <Services services={services} reload={loadBase} />}
         {tab === "fotos" && <Photos />}
         {tab === "barbeiros" && <Barbers barbers={barbers} reload={loadBase} />}
@@ -304,6 +308,130 @@ function Photos() {
           {!gallery.length && <p className="col-span-full text-muted-foreground">Nenhuma foto enviada ainda.</p>}
         </div>
       </section>
+    </div>
+  );
+}
+
+function Notice({ msg }: { msg: { ok: boolean; t: string } | null }) {
+  if (!msg) return null;
+  return <p className={`rounded-lg border p-3 text-sm ${msg.ok ? "border-success text-success" : "border-destructive text-destructive"}`}>{msg.t}</p>;
+}
+
+type HourRow = { weekday: number; open: string; close: string; closed: boolean };
+
+function WeekHoursEditor() {
+  const [rows, setRows] = useState<HourRow[]>([]);
+  const [msg, setMsg] = useState<{ ok: boolean; t: string } | null>(null);
+  const [saving, setSaving] = useState(false);
+  useEffect(() => {
+    supabase.from("business_hours").select("*").then(({ data }) => {
+      const byDay = new Map((data ?? []).map((r) => [r.weekday, r]));
+      setRows([1, 2, 3, 4, 5, 6, 0].map((d) => {
+        const r = byDay.get(d);
+        return { weekday: d, open: r?.open_time?.slice(0, 5) ?? "09:00", close: r?.close_time?.slice(0, 5) ?? "20:00", closed: !r?.open_time || !r?.close_time };
+      }));
+    });
+  }, []);
+  const upd = (d: number, p: Partial<HourRow>) => setRows((rs) => rs.map((r) => (r.weekday === d ? { ...r, ...p } : r)));
+  const save = async () => {
+    setMsg(null);
+    const bad = rows.find((r) => !r.closed && r.open >= r.close);
+    if (bad) return setMsg({ ok: false, t: `${WEEKDAYS[bad.weekday]}: o horário de fechar precisa ser depois do de abrir.` });
+    setSaving(true);
+    const { error } = await supabase.from("business_hours").upsert(rows.map((r) => ({ weekday: r.weekday, open_time: r.closed ? null : r.open, close_time: r.closed ? null : r.close })));
+    setSaving(false);
+    setMsg(error ? { ok: false, t: "Não foi possível salvar: " + error.message } : { ok: true, t: "Horários salvos! O site já mostra os novos horários." });
+  };
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-4xl">Horário de funcionamento</h2>
+        <p className="text-sm text-muted-foreground">Vale para todas as semanas. Para um dia específico (feriado, folga), use a aba "Feriados e folgas".</p>
+      </div>
+      <div className="space-y-2">
+        {rows.map((r) => (
+          <div key={r.weekday} className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4">
+            <span className="w-28 font-semibold">{WEEKDAYS[r.weekday]}</span>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!r.closed} onChange={(e) => upd(r.weekday, { closed: !e.target.checked })} /> Abre</label>
+            {r.closed ? <span className="text-sm text-destructive">Fechado</span> : (
+              <>
+                <label className="flex items-center gap-2 text-sm">das <input type="time" step={1800} className="field !w-32" value={r.open} onChange={(e) => upd(r.weekday, { open: e.target.value })} /></label>
+                <label className="flex items-center gap-2 text-sm">até <input type="time" step={1800} className="field !w-32" value={r.close} onChange={(e) => upd(r.weekday, { close: e.target.value })} /></label>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+      <Notice msg={msg} />
+      <button onClick={save} disabled={saving || !rows.length} className="btn-gold">{saving ? "Salvando..." : "Salvar horários"}</button>
+    </div>
+  );
+}
+
+type Special = { day: string; open_time: string | null; close_time: string | null; reason: string };
+
+function SpecialDays() {
+  const [list, setList] = useState<Special[]>([]);
+  const [day, setDay] = useState("");
+  const [closed, setClosed] = useState(true);
+  const [open, setOpen] = useState("09:00");
+  const [close, setClose] = useState("12:00");
+  const [reason, setReason] = useState("");
+  const [msg, setMsg] = useState<{ ok: boolean; t: string } | null>(null);
+  const today = toISODate(new Date());
+  const load = () => supabase.from("special_days").select("*").gte("day", today).order("day").then(({ data }) => setList((data as Special[]) ?? []));
+  useEffect(() => { load(); }, []);
+  const add = async (e: React.FormEvent) => {
+    e.preventDefault(); setMsg(null);
+    if (!day) return setMsg({ ok: false, t: "Escolha a data." });
+    if (day < today) return setMsg({ ok: false, t: "Escolha uma data de hoje em diante." });
+    if (!closed && open >= close) return setMsg({ ok: false, t: "O horário de fechar precisa ser depois do de abrir." });
+    const { error } = await supabase.from("special_days").upsert({ day, open_time: closed ? null : open, close_time: closed ? null : close, reason: reason.trim() || (closed ? "Fechado" : "Horário especial") });
+    if (error) return setMsg({ ok: false, t: "Não foi possível salvar: " + error.message });
+    const { count } = await supabase.from("appointments").select("id", { count: "exact", head: true }).eq("appt_date", day).neq("status", "cancelado");
+    setMsg({ ok: true, t: `Salvo! ${count ? `Atenção: já existem ${count} agendamento(s) nesse dia — veja na aba Agenda e avise os clientes.` : "Os clientes já não conseguem agendar fora desse horário."}` });
+    setDay(""); setReason(""); load();
+  };
+  const del = async (d: string) => { if (confirm("Voltar ao horário normal nesse dia?")) { await supabase.from("special_days").delete().eq("day", d); load(); } };
+  const fmtDay = (d: string) => new Date(d + "T12:00:00").toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-4xl">Feriados, folgas e horários especiais</h2>
+        <p className="text-sm text-muted-foreground">Feche um dia (feriado, folga, viagem) ou mude o horário só daquele dia. No site, o dia fica bloqueado para agendamento.</p>
+      </div>
+      <form onSubmit={add} className="space-y-4 rounded-xl border border-border bg-card p-5">
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="flex items-center gap-2 text-sm">Data <input type="date" min={today} className="field !w-auto" value={day} onChange={(e) => setDay(e.target.value)} required /></label>
+          <input className="field min-w-48 flex-1" placeholder="Motivo (ex.: Feriado de Natal)" value={reason} onChange={(e) => setReason(e.target.value)} maxLength={60} />
+        </div>
+        <div className="flex flex-wrap items-center gap-4 text-sm">
+          <label className="flex items-center gap-2"><input type="radio" checked={closed} onChange={() => setClosed(true)} /> Fechado o dia todo</label>
+          <label className="flex items-center gap-2"><input type="radio" checked={!closed} onChange={() => setClosed(false)} /> Horário diferente</label>
+          {!closed && (
+            <>
+              <label className="flex items-center gap-2">das <input type="time" step={1800} className="field !w-32" value={open} onChange={(e) => setOpen(e.target.value)} /></label>
+              <label className="flex items-center gap-2">até <input type="time" step={1800} className="field !w-32" value={close} onChange={(e) => setClose(e.target.value)} /></label>
+            </>
+          )}
+        </div>
+        <Notice msg={msg} />
+        <button className="btn-gold">Salvar dia</button>
+      </form>
+      <div className="space-y-2">
+        <h3 className="text-2xl">Próximos dias marcados</h3>
+        {!list.length && <p className="text-muted-foreground">Nenhum feriado ou folga marcado.</p>}
+        {list.map((s) => (
+          <div key={s.day} className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4">
+            <span className="min-w-56 flex-1 font-semibold capitalize">{fmtDay(s.day)}</span>
+            <span className="text-sm text-muted-foreground">{s.reason}</span>
+            <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase ${s.open_time ? "bg-accent text-accent-foreground" : "bg-destructive text-destructive-foreground"}`}>
+              {s.open_time && s.close_time ? `${s.open_time.slice(0, 5)} às ${s.close_time.slice(0, 5)}` : "Fechado"}
+            </span>
+            <button onClick={() => del(s.day)} className="text-sm text-destructive">Remover</button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
