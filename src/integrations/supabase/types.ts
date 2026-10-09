@@ -86,6 +86,24 @@ export type Database = {
         }
         Relationships: []
       }
+      business_hours: {
+        Row: {
+          close_time: string | null
+          open_time: string | null
+          weekday: number
+        }
+        Insert: {
+          close_time?: string | null
+          open_time?: string | null
+          weekday: number
+        }
+        Update: {
+          close_time?: string | null
+          open_time?: string | null
+          weekday?: number
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           active: boolean
