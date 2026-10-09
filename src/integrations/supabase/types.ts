@@ -155,6 +155,30 @@ export type Database = {
         }
         Relationships: []
       }
+      special_days: {
+        Row: {
+          close_time: string | null
+          created_at: string
+          day: string
+          open_time: string | null
+          reason: string
+        }
+        Insert: {
+          close_time?: string | null
+          created_at?: string
+          day: string
+          open_time?: string | null
+          reason?: string
+        }
+        Update: {
+          close_time?: string | null
+          created_at?: string
+          day?: string
+          open_time?: string | null
+          reason?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string

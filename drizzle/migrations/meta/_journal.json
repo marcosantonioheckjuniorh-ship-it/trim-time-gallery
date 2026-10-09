@@ -29,6 +29,13 @@
       "when": 1791504674899,
       "tag": "0003_business_hours",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791505394073,
+      "tag": "0004_special_days",
+      "breakpoints": true
     }
   ]
 }
