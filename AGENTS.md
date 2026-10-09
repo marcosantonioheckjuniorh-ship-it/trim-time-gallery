@@ -12,3 +12,4 @@
 - Store newly added gallery media in Lovable Assets and import its generated JSON pointers; this keeps uploaded binaries out of the repository.
 - Keep public social destinations in src/lib/social.ts and reserve WhatsApp tabs during the submit gesture, before asynchronous saves, to avoid popup blockers while retaining a clickable fallback.
 - Opening hours and holidays live in business_hours/special_days and are read via src/lib/useSchedule.ts; a DB trigger rejects bookings outside them so the site and database never disagree.
+- Keep owner sign-in in AdminLogin and password recovery on the public /reset-password route; reuse existing account roles so changing credentials never grants administrative access.
