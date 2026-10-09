@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { brl, toISODate, WEEKDAYS } from "@/lib/schedule";
 import { LogOut, Scissors, Calendar, Tag, Users, MessageCircle, Image as ImageIcon, Clock, CalendarOff } from "lucide-react";
 import { loadSitePhotos, type SitePhoto } from "@/lib/photos";
+import { AdminLogin } from "@/components/AdminLogin";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -55,34 +56,11 @@ function Center({ children }: { children: React.ReactNode }) {
 }
 
 function Login() {
-  const [email, setEmail] = useState("");
-  const [msg, setMsg] = useState("");
-  const [sent, setSent] = useState(false);
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault(); setMsg("");
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/admin` },
-    });
-    if (error) setMsg(error.message);
-    else setSent(true);
-  };
   return (
     <Center>
       <Scissors className="mx-auto h-8 w-8 text-primary" />
       <h1 className="mt-3 text-5xl">Área do dono</h1>
-      {sent ? (
-        <p className="mt-6 text-sm text-muted-foreground">
-          Link enviado para <span className="text-foreground">{email}</span>. Abra seu e-mail e clique no link para entrar — sem senha.
-        </p>
-      ) : (
-        <form onSubmit={submit} className="mt-6 space-y-3 text-left">
-          <input className="field" type="email" placeholder="Seu e-mail" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          {msg && <p className="text-sm text-primary">{msg}</p>}
-          <button className="btn-gold w-full">Enviar link de acesso</button>
-          <p className="text-center text-xs text-muted-foreground">Você recebe um link no e-mail e entra sem senha.</p>
-        </form>
-      )}
+      <AdminLogin />
       <p className="mt-6"><Link to="/" className="text-sm text-muted-foreground hover:text-primary">← Voltar ao site</Link></p>
     </Center>
   );
