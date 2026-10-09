@@ -26,7 +26,8 @@ import { BarberPoles } from "@/components/BarberPoles";
 import { useSitePhotos } from "@/lib/photos";
 import { Booking } from "@/components/Booking";
 import { AgendaPublic } from "@/components/AgendaPublic";
-import { ADDRESS, HOURS_LABEL } from "@/lib/schedule";
+import { ADDRESS, hoursLabel } from "@/lib/schedule";
+import { useSchedule } from "@/lib/useSchedule";
 import { INSTAGRAM, whatsappUrl } from "@/lib/social";
 
 export const Route = createFileRoute("/")({
@@ -62,6 +63,7 @@ const WHATSAPP_LINK = whatsappUrl("Olá! Quero agendar um horário na Barbearia 
 function Index() {
   const [prices, setPrices] = useState<PriceRow[]>([]);
   const photos = useSitePhotos();
+  const schedule = useSchedule();
   const heroImg = photos.find((p) => p.kind === "hero")?.url ?? hero;
   const gallery = [...photos.filter((p) => p.kind === "gallery").map((p) => p.url), ...baseGallery];
   useEffect(() => {
@@ -194,7 +196,7 @@ function Index() {
         <div className="relative mx-auto grid max-w-6xl gap-6 px-5 py-24 md:grid-cols-2 lg:grid-cols-4">
           {[
             { i: MapPin, t: "Endereço", c: <p>{ADDRESS}</p> },
-            { i: Clock, t: "Horários", c: HOURS_LABEL.map((h) => <p key={h}>{h}</p>) },
+            { i: Clock, t: "Horários", c: hoursLabel(schedule.hours).map((h) => <p key={h}>{h}</p>) },
             { i: MessageCircle, t: "WhatsApp", c: <a className="text-primary underline" href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer">(47) 9141-2316</a> },
             { i: Instagram, t: "Instagram", c: <a className="text-primary underline" href={INSTAGRAM} target="_blank" rel="noreferrer">@barbearia.staudt</a> },
           ].map(({ i: Icon, t, c }) => (
