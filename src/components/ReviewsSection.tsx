@@ -42,7 +42,16 @@ export function ReviewsSection() {
     });
     setSending(false);
     if (error) {
-      setMessage({ ok: false, text: "Não foi possível enviar agora. Tente novamente em instantes." });
+      console.error("[Avaliações] Falha ao enviar:", { code: error.code, message: error.message, details: error.details, hint: error.hint });
+      const missingTable = error.code === "42P01" || error.code === "PGRST205" || /relation .*reviews.* does not exist|could not find the table .*reviews/i.test(error.message);
+      setMessage({
+        ok: false,
+        text: missingTable
+          ? "A tabela de avaliações ainda não existe no banco. O administrador precisa aplicar a migração SQL do repositório no Supabase."
+          : error.code === "42501"
+            ? "O banco bloqueou o envio por uma regra de permissão. Confira as políticas RLS da tabela reviews no Supabase."
+            : "Não foi possível enviar a avaliação. Confira o erro no console do navegador (F12) ou verifique a configuração da tabela reviews no Supabase.",
+      });
       return;
     }
     setName("");
