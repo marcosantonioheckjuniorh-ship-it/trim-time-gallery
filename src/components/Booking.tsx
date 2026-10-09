@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { slotsFor, toISODate, brl } from "@/lib/schedule";
+import { useSchedule } from "@/lib/useSchedule";
 import { reserveWhatsAppTab, whatsappUrl } from "@/lib/social";
 
 type Barber = { id: string; name: string };
@@ -19,6 +20,7 @@ export function Booking() {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string; url?: string } | null>(null);
 
+  const cfg = useSchedule();
   const [monthOffset, setMonthOffset] = useState(0);
   const [tick, setTick] = useState(0);
   useEffect(() => { const id = setInterval(() => setTick((t) => t + 1), 20000); return () => clearInterval(id); }, []);
@@ -50,7 +52,7 @@ export function Booking() {
   useEffect(() => { if (time && booked.includes(time)) setTime(""); }, [booked]);
 
   const now = new Date();
-  const slots = date ? slotsFor(date).filter((s) => date !== toISODate(now) || s > `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`) : [];
+  const slots = date ? slotsFor(date, cfg).filter((s) => date !== toISODate(now) || s > `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`) : [];
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +69,7 @@ export function Booking() {
     setLoading(false);
     if (error) {
       whatsappTab?.close();
-      setMsg({ ok: false, text: error.code === "23505" ? "Esse horário acabou de ser reservado. Escolha outro." : "Não foi possível agendar. Tente novamente." });
+      setMsg({ ok: false, text: error.code === "23505" ? "Esse horário acabou de ser reservado. Escolha outro." : error.code === "P0001" ? "A barbearia não atende nesse dia/horário. Escolha outro." : "Não foi possível agendar. Tente novamente." });
       loadBooked();
       return;
     }
@@ -123,7 +125,7 @@ export function Booking() {
             {calendar.map((d, i) => {
               if (!d) return <div key={i} />;
               const iso = toISODate(d);
-              const closed = slotsFor(iso).length === 0 || iso < todayISO;
+              const closed = slotsFor(iso, cfg).length === 0 || iso < todayISO;
               return (
                 <button type="button" key={iso} disabled={closed} onClick={() => setDate(iso)}
                   className={`aspect-square rounded-md border font-display text-xl transition disabled:border-transparent disabled:opacity-25 ${date === iso ? "border-primary bg-gold text-primary-foreground" : iso === todayISO ? "border-primary/60" : "border-border hover:border-primary/50"}`}>
@@ -140,7 +142,7 @@ export function Booking() {
         {!date ? (
           <p className="text-sm text-muted-foreground">Escolha o dia para ver os horários livres.</p>
         ) : slots.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Sem horários disponíveis nesse dia.</p>
+          <p className="text-sm text-muted-foreground">{cfg.special[date]?.reason ? `Fechado: ${cfg.special[date].reason}.` : "Sem horários disponíveis nesse dia."}</p>
         ) : (
           <div className="space-y-5">
             <div>

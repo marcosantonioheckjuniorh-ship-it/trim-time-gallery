@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { slotsFor, toISODate } from "@/lib/schedule";
+import { useSchedule } from "@/lib/useSchedule";
 
 export function AgendaPublic() {
   const [barber, setBarber] = useState("");
   const [date, setDate] = useState(toISODate(new Date()));
   const [booked, setBooked] = useState<string[]>([]);
   const [tick, setTick] = useState(0);
+  const cfg = useSchedule();
 
   useEffect(() => { const id = setInterval(() => setTick((t) => t + 1), 20000); return () => clearInterval(id); }, []);
 
@@ -32,7 +34,7 @@ export function AgendaPublic() {
 
   const now = new Date();
   const nowHM = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-  const slots = slotsFor(date).filter((s) => date !== toISODate(now) || s > nowHM);
+  const slots = slotsFor(date, cfg).filter((s) => date !== toISODate(now) || s > nowHM);
 
   const free = slots.filter((s) => !booked.includes(s));
   const taken = slots.filter((s) => booked.includes(s));
@@ -49,7 +51,7 @@ export function AgendaPublic() {
       <div className="mb-6 flex flex-wrap gap-2">
         {days.map((d) => {
           const iso = toISODate(d);
-          const closed = slotsFor(iso).length === 0;
+          const closed = slotsFor(iso, cfg).length === 0;
           return (
             <button key={iso} type="button" disabled={closed} onClick={() => setDate(iso)}
               className={`rounded-lg border px-4 py-2 text-center transition disabled:opacity-25 ${date === iso ? "border-primary bg-gold text-primary-foreground" : "border-border hover:border-primary/50"}`}>
@@ -62,7 +64,7 @@ export function AgendaPublic() {
         })}
       </div>
       {slots.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Sem atendimento nesse dia.</p>
+        <p className="text-sm text-muted-foreground">{cfg.special[date]?.reason ? `Fechado: ${cfg.special[date].reason}.` : "Sem atendimento nesse dia."}</p>
       ) : (
         <div className="space-y-6">
           <div>
