@@ -195,7 +195,7 @@ function Index() {
           {[
             { i: MapPin, t: "Endereço", c: <p>{ADDRESS}</p> },
             { i: Clock, t: "Horários", c: HOURS_LABEL.map((h) => <p key={h}>{h}</p>) },
-            { i: MessageCircle, t: "WhatsApp", c: <a className="text-primary underline" href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer">(47) 99141-2316</a> },
+            { i: MessageCircle, t: "WhatsApp", c: <a className="text-primary underline" href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer">(47) 9141-2316</a> },
             { i: Instagram, t: "Instagram", c: <a className="text-primary underline" href={INSTAGRAM} target="_blank" rel="noreferrer">@barbearia.staudt</a> },
           ].map(({ i: Icon, t, c }) => (
             <div key={t} className="rounded-xl border border-border bg-background/80 p-6 backdrop-blur">
