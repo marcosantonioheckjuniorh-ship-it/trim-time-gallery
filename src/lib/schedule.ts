@@ -45,10 +45,10 @@ export function hoursLabel(hours: WeekHours): string[] {
   const lines: string[] = [];
   let i = 0;
   while (i < order.length) {
-    const h = hours[order[i]];
+    const h = hours[at(i)];
     let j = i;
-    while (j + 1 < order.length && JSON.stringify(hours[order[j + 1]]) === JSON.stringify(h)) j++;
-    const name = i === j ? WEEKDAYS[order[i]] : `${WEEKDAYS[order[i]].slice(0, 3)} a ${WEEKDAYS[order[j]].slice(0, 3)}`;
+    while (j + 1 < order.length && JSON.stringify(hours[at(j + 1)]) === JSON.stringify(h)) j++;
+    const name = i === j ? WEEKDAYS[at(i)] : `${WEEKDAYS[at(i)].slice(0, 3)} a ${WEEKDAYS[at(j)].slice(0, 3)}`;
     lines.push(`${name} · ${h ? `${pretty(h[0])} às ${pretty(h[1])}` : "Fechado"}`);
     i = j + 1;
   }
