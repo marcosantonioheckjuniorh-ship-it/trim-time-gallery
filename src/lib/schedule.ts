@@ -40,7 +40,8 @@ export function slotsFor(dateStr: string, cfg: ScheduleConfig = DEFAULT_SCHEDULE
 const pretty = (t: string) => { const [h, m] = t.split(":"); return m === "00" ? `${Number(h)}h` : `${Number(h)}h${m}`; };
 
 export function hoursLabel(hours: WeekHours): string[] {
-  const order = [1, 2, 3, 4, 5, 6, 0];
+  const order: number[] = [1, 2, 3, 4, 5, 6, 0];
+  const at = (k: number) => order[k] as number;
   const lines: string[] = [];
   let i = 0;
   while (i < order.length) {
