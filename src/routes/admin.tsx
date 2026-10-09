@@ -213,7 +213,10 @@ function Agenda({ barbers, services }: { barbers: Barber[]; services: Service[] 
 
 function Services({ services, reload }: { services: Service[]; reload: () => void }) {
   const save = async (s: Service) => {
-    await supabase.from("services").update({ name: s.name, price: s.price, duration_min: s.duration_min, active: s.active }).eq("id", s.id); reload();
+    const { error } = await supabase.from("services").update({ name: s.name, price: s.price, duration_min: s.duration_min, active: s.active }).eq("id", s.id);
+    if (error) alert("Não foi possível salvar: " + error.message);
+    reload();
+    return !error;
   };
   const add = async () => { await supabase.from("services").insert({ name: "Novo serviço", price: 0, sort: services.length + 1 }); reload(); };
   const del = async (id: string) => { if (confirm("Excluir serviço?")) { await supabase.from("services").delete().eq("id", id); reload(); } };
@@ -225,14 +228,15 @@ function Services({ services, reload }: { services: Service[]; reload: () => voi
   );
 }
 
-function ServiceRow({ s, onSave, onDel }: { s: Service; onSave: (s: Service) => void; onDel: (id: string) => void }) {
+function ServiceRow({ s, onSave, onDel }: { s: Service; onSave: (s: Service) => Promise<boolean>; onDel: (id: string) => void }) {
   const [v, setV] = useState(s);
+  const [ok, setOk] = useState(false);
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4">
       <input className="field min-w-40 flex-1" value={v.name} onChange={(e) => setV({ ...v, name: e.target.value })} />
       <label className="flex items-center gap-2 text-sm">R$ <input type="number" className="field !w-24" value={v.price} onChange={(e) => setV({ ...v, price: Number(e.target.value) })} /></label>
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={v.active} onChange={(e) => setV({ ...v, active: e.target.checked })} /> Ativo</label>
-      <button onClick={() => onSave(v)} className="btn-gold !px-4 !py-2 text-xs">Salvar</button>
+      <button onClick={async () => { if (await onSave(v)) { setOk(true); setTimeout(() => setOk(false), 2500); } }} className="btn-gold !px-4 !py-2 text-xs">{ok ? "Salvo ✓" : "Salvar"}</button>
       <button onClick={() => onDel(s.id)} className="text-sm text-destructive">Excluir</button>
     </div>
   );
