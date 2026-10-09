@@ -55,33 +55,34 @@ function Center({ children }: { children: React.ReactNode }) {
 }
 
 function Login() {
-  const [mode, setMode] = useState<"in" | "up">("in");
   const [email, setEmail] = useState("");
-  const [pw, setPw] = useState("");
   const [msg, setMsg] = useState("");
+  const [sent, setSent] = useState(false);
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); setMsg("");
-    if (mode === "in") {
-      const { error } = await supabase.auth.signInWithPassword({ email, password: pw });
-      if (error) setMsg("E-mail ou senha incorretos (ou e-mail ainda não confirmado).");
-    } else {
-      const { error } = await supabase.auth.signUp({ email, password: pw, options: { emailRedirectTo: `${window.location.origin}/admin` } });
-      setMsg(error ? error.message : "Conta criada! Confirme pelo link enviado ao seu e-mail e depois entre.");
-    }
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/admin` },
+    });
+    if (error) setMsg(error.message);
+    else setSent(true);
   };
   return (
     <Center>
       <Scissors className="mx-auto h-8 w-8 text-primary" />
       <h1 className="mt-3 text-5xl">Área do dono</h1>
-      <form onSubmit={submit} className="mt-6 space-y-3 text-left">
-        <input className="field" type="email" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        <input className="field" type="password" placeholder="Senha (mín. 6)" value={pw} onChange={(e) => setPw(e.target.value)} minLength={6} required />
-        {msg && <p className="text-sm text-primary">{msg}</p>}
-        <button className="btn-gold w-full">{mode === "in" ? "Entrar" : "Criar conta"}</button>
-      </form>
-      <button className="mt-4 text-sm text-muted-foreground underline" onClick={() => setMode(mode === "in" ? "up" : "in")}>
-        {mode === "in" ? "Primeiro acesso? Criar conta" : "Já tenho conta"}
-      </button>
+      {sent ? (
+        <p className="mt-6 text-sm text-muted-foreground">
+          Link enviado para <span className="text-foreground">{email}</span>. Abra seu e-mail e clique no link para entrar — sem senha.
+        </p>
+      ) : (
+        <form onSubmit={submit} className="mt-6 space-y-3 text-left">
+          <input className="field" type="email" placeholder="Seu e-mail" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          {msg && <p className="text-sm text-primary">{msg}</p>}
+          <button className="btn-gold w-full">Enviar link de acesso</button>
+          <p className="text-center text-xs text-muted-foreground">Você recebe um link no e-mail e entra sem senha.</p>
+        </form>
+      )}
       <p className="mt-6"><Link to="/" className="text-sm text-muted-foreground hover:text-primary">← Voltar ao site</Link></p>
     </Center>
   );
